@@ -18,32 +18,82 @@ const pieceValues = {
 }
 
 const getBestMove = () => {
-	let moves = game.ugly_moves();
+	let moves = game.ugly_moves(),
+		positionCount = 0,
+		bestMove = null,
+		maxValue = -9999, //dummy max for black
+		maxPlayer = true
+
+	let depth = parseInt($('#search-depth').find(':selected').text());
+
+	// return move with highest evaluation post recursive search at specified depth
+
+		for(let i = 0; i < moves.length; i++) {
+			let currentMove = moves[i]
+			game.ugly_move(currentMove)
+			let moveValue = minimax(depth - 1, !maxPlayer)
+
+			if (moveValue >= maxValue) {
+				maxValue = moveValue
+				bestMove = currentMove
+			}
+			
+			game.undo();
+
+		}
+
+		return bestMove;
+
 
 	// return move with highest resulting board evaluation
 
-	let bestMove = null;
-	let maxValue = -9999 //dummy max for black
 
-	for (let i = 0; i < moves.length; i++){
-		let currentMove = moves[i]
-		game.ugly_move(currentMove);
+	// for (let i = 0; i < moves.length; i++){
+	// 	let currentMove = moves[i]
+	// 	game.ugly_move(currentMove);
 
-		let boardValue = -evaluateBoard(game.board())
+	// 	let boardValue = -evaluateBoard(game.board())
 
-		if(boardValue > maxValue) {
-			bestMove = currentMove;
-		}
+	// 	if(boardValue > maxValue) {
+	// 		bestMove = currentMove;
+	// 	}
 
-		game.undo();
-	}
+	// 	game.undo();
+	// }
 
-	return bestMove
+	// return bestMove
 
 
 	// return random move out of possible moves
 	// return moves[Math.floor(Math.random() * moves.length)]
-};
+ };
+
+let positionCount;
+
+const minimax = (depth, maxPlayer) => {
+	let moves = game.ugly_moves()
+	let maxValue = -9999;
+	positionCount++;
+
+	if (depth === 0) {
+		return -evaluateBoard(game.board());
+	}
+
+	for(let i = 0; i < moves.length; i++) {
+		let currentMove = moves[i]
+		game.ugly_move(currentMove)
+		if(maxPlayer) {
+			maxValue = Math.max(maxValue, minimax(depth - 1, !maxPlayer))
+		} else {
+		 	maxValue = Math.min(maxValue * -1, minimax(depth - 1, !maxPlayer))
+		}
+
+		game.undo();
+
+	}
+
+	return maxValue
+}
 
 const evaluateBoard = (board) => {
 	let evaluation = 0;
@@ -68,10 +118,18 @@ const onDragStart = (source, piece, position, orientation) => {
 }
 
 const makeBestMove = () => {
-	let bestMove = getBestMove(game);
+	let startDate = new Date().getTime();
+	positionCount = 0;
+
+	let bestMove = getBestMove();
+	let endDate = new Date().getTime();
+	let totalTime = (endDate - startDate);
+
 	game.ugly_move(bestMove);
 	board.position(game.fen());
-	renderMoveHistory(game.history());
+	$('#positions-evaluated').text(positionCount)
+	$('#time').text(totalTime)
+	// renderMoveHistory(game.history());
 }
 
 //temporarily disabling move history
@@ -97,6 +155,7 @@ const onDrop = (source, target) => {
 
 	renderMoveHistory(game.history());
 	window.setTimeout(makeBestMove, 250);
+	
 };	
 
 const onSnapEnd = () => {

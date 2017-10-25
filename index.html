@@ -9,6 +9,20 @@
 <div id="board" class="board"></div>
 <div class="info">
         <div id="move-history" class="move-history"></div>
+        <br></br>
+        Search Depth:
+        <select id="search-depth">
+        	<option value="1">1</option>
+        	<option value="2">2</option>
+        	<option value="3">3</option>
+        	<option value="4">4</option>
+        	<option value="5">5</option>
+        </select>
+        
+        <br>
+        <span>Positions Evaluated: <span id="positions-evaluated"></span>
+        <br>
+        <span>Time (secs): <span id="time"></span></span>
 </div>
 <script src="lib/jquery/jquery-3.2.1.min.js"></script>
 <script src="lib/chessboardjs/js/chess.js"></script>
